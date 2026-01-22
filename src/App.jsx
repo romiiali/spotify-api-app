@@ -1,6 +1,6 @@
 import { useState,useEffect } from "react";
 import { FormControl , InputGroup , Container , Button  } from "react-bootstrap";
-//import "./App.css"
+import "./App.css"
 // App.jsx
 const apikey = import.meta.env.VITE_API_KEY;
 
@@ -48,10 +48,9 @@ function App() {
   };
 
 
-
   return (
    <>
-    <InputGroup>
+    <InputGroup className="">
         <FormControl 
         placeholder="Search YT"
         onKeyDown={(event)=>{
@@ -68,40 +67,48 @@ function App() {
         borderRadius: "5px",
         marginRight: "10px",
         paddingLeft: "10px",
+        background: "gray"
       }}/>
         <Button onClick={execute}>Search</Button>
     </InputGroup>
 
     <Container>
-      <ul style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(1, 1fr)",
-        gap: "16px",
-        listStyle: "none",
-        padding: "0",
-        margin: "20px 0",
-        "@media (min-width: 640px)": {
-          gridTemplateColumns: "repeat(2, 1fr)"
-        },
-        "@media (min-width: 1024px)": {
-          gridTemplateColumns: "repeat(3, 1fr)"
-        },
-        "@media (min-width: 1280px)": {
-          gridTemplateColumns: "repeat(4, 1fr)"
-        }
-      }}>
-        {data.map((item)=>{
-          return(
-            <li key={item.id.videoId} className="card">
-              <p>Channel:{item.snippet.channelTitle}</p>
-              <p>Title: {item.snippet.title}</p>
-              <img src={item.snippet.thumbnails.default.url} className="image"/>
-            </li>
-        )
-      })}
-      </ul>
-    </Container>
+  <ul className="grid grid-cols-3 gap-4">
+    {data.map((item) => {
+      const videoUrl = `https://www.youtube.com/watch?v=${item.id.videoId}`;
+      
+      return (
+        <li 
+          key={item.id.videoId} 
+          className="group relative m-4 p-4 rounded-2xl bg-gradient-to-b from-gray-600 to-black hover:from-gray-700 hover:to-gray-900 transition-all duration-300"
+        >
+          {/* Hover Banner */}
+          <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto z-10">
+            <div className="bg-black text-white px-4 py-2 rounded-lg shadow-xl whitespace-nowrap">
+              <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 font-medium">Watch Video </a>
+            </div>
+            {/* Arrow */}
+            <div className="w-3 h-3 bg-gray-600 transform rotate-45 mx-auto -mt-1"></div>
+          </div>
 
+          <img 
+            src={item.snippet.thumbnails.default.url} 
+            alt={item.snippet.title}
+            className="w-full rounded-xl mb-4 transform group-hover:scale-[1.02] transition-transform duration-300"/>
+          
+          <div className="space-y-2">
+            <p className="text-gray-300 font-semibold text-sm line-clamp-2">
+              {item.snippet.title}
+            </p>
+            <p className="text-gray-400 text-xs">
+              {item.snippet.channelTitle}
+            </p>
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+</Container>
     </>
    
   )
