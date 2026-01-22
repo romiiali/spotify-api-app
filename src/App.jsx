@@ -8,6 +8,10 @@ const apikey = import.meta.env.VITE_API_KEY;
 function App() {
   
   const [data,setData]=useState([]);
+  const [nextpage,setNextPage]=useState("");
+  const [searched,setSearched]=useState(false)
+  const [prevpage,setPrevPage]=useState("");
+  const [results,setResults]=useState();
   const [input,setInput]=useState("");
   useEffect(() => { const initClient = async () => { 
     if (window.gapi) 
@@ -42,14 +46,67 @@ function App() {
     .then(function(response){
       console.log(response)
       setData(response.result.items)
+      setNextPage(response.result.nextPageToken)
+      setResults(response.result.pageInfo.totalResults)
+      setPrevPage(response.result.prevPageToken)
+      setSearched(true)
     },
     function(err) { console.error("Execute error", err); 
     });
   };
 
+  function executeNext(){
+    return gapi.client.youtube.search.list({
+      "part": [
+        "snippet"
+      ],
+      "maxResults": 25,
+      "order": "relevance",
+      "pageToken": nextpage,
+      "q": input,
+      "type": [
+        "videos"
+      ]
+    })
+    .then(function(response){
+      console.log(response)
+      setData(response.result.items)
+      setNextPage(response.result.nextPageToken)
+      setResults(response.result.pageInfo.totalResults)
+      setPrevPage(response.result.prevPageToken)
+      setSearched(true)
+    },
+    function(err) { console.error("Execute error", err); 
+    });
+  };
+
+  function executePrev(){
+    return gapi.client.youtube.search.list({
+      "part": [
+        "snippet"
+      ],
+      "maxResults": 25,
+      "order": "relevance",
+      "pageToken": prevpage,
+      "q": input,
+      "type": [
+        "videos"
+      ]
+    })
+    .then(function(response){
+      console.log(response)
+      setData(response.result.items)
+      setNextPage(response.result.nextPageToken)
+      setResults(response.result.pageInfo.totalResults)
+      setPrevPage(response.result.prevPageToken)
+      setSearched(true)
+    },
+    function(err) { console.error("Execute error", err); 
+    });
+  };
 
   return (
-   <>
+  <>
     <InputGroup className="">
         <FormControl 
         placeholder="Search YT"
@@ -80,7 +137,7 @@ function App() {
       return (
         <li 
           key={item.id.videoId} 
-          className="group relative m-4 p-4 rounded-2xl bg-gradient-to-b from-gray-600 to-black hover:from-gray-700 hover:to-gray-900 transition-all duration-300"
+          className="group relative m-4 p-4 rounded-2xl bg-linear-to-b from-gray-600 to-black hover:from-gray-700 hover:to-gray-900 transition-all duration-300"
         >
           {/* Hover Banner */}
           <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto z-10">
@@ -109,8 +166,29 @@ function App() {
     })}
   </ul>
 </Container>
+  <Container className="flex-row">
+      {(() => {
+        if(searched){
+          if(results===0){
+          return(
+            <h3>Sorry No Results!!</h3>
+          )
+        }else if(!prevpage){
+          return(
+          <Button onClick={executeNext}>Next Page</Button>
+          )
+        }else{
+          return(
+            <>
+            <Button onClick={executePrev}>Prev Page</Button>
+            <Button onClick={executeNext}>Next Page</Button>
+            </>
+          )
+        }
+        }
+      })()}
+  </Container>
     </>
-   
   )
 }
 
